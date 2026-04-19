@@ -25,24 +25,17 @@ export async function registerPasien(prevState: any, formData: FormData) {
     const existingPasien = await prisma.pasien.findUnique({ where: { nik } })
     if (existingPasien) return { error: 'NIK sudah terdaftar!' }
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    await fs.mkdir(uploadDir, { recursive: true }).catch(() => {});
-
     let ktpPath = null;
     let bpjsPath = null;
 
+    // Catatan: Vercel menerapkan Read-Only File System, sehingga fs.writeFile tidak akan bekerja di server produksi.
+    // Sebagai MVP sementara sebelum mengintegrasikan Vercel Blob/S3, kita hanya akan menyimpan nama filenya saja.
     if (dokumen_ktp && dokumen_ktp.size > 0) {
-      const buffer = Buffer.from(await dokumen_ktp.arrayBuffer());
-      const filename = `ktp_${Date.now()}_${dokumen_ktp.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
-      ktpPath = `/uploads/${filename}`;
-      await fs.writeFile(path.join(uploadDir, filename), buffer);
+      ktpPath = `/uploads/dummy_${dokumen_ktp.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
     }
     
     if (dokumen_bpjs && dokumen_bpjs.size > 0) {
-      const buffer = Buffer.from(await dokumen_bpjs.arrayBuffer());
-      const filename = `bpjs_${Date.now()}_${dokumen_bpjs.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
-      bpjsPath = `/uploads/${filename}`;
-      await fs.writeFile(path.join(uploadDir, filename), buffer);
+      bpjsPath = `/uploads/dummy_${dokumen_bpjs.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
     }
 
     await prisma.$transaction(async (tx) => {
