@@ -58,7 +58,7 @@ export default async function DokterDashboard() {
         <main className="main-content">
             <div className="topbar">
                 <h2>Dashboard Antrean Pasien - {dokter.poliklinik.namaPoli}</h2>
-                <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}</div>
             </div>
 
             <div className="card">

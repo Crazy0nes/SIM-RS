@@ -55,7 +55,7 @@ export default async function PasienDashboard() {
       <main className="main-content">
         <div className="topbar">
             <h2>Selamat Datang, {pasien?.namaLengkap || session.username}</h2>
-            <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+            <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}</div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
@@ -67,7 +67,7 @@ export default async function PasienDashboard() {
                             {String(antreanHariIni.noAntrean).padStart(3, '0')}
                         </div>
                         <p>Status: <strong style={{ color: "var(--primary-color)", textTransform: "uppercase" }}>{antreanHariIni.status}</strong></p>
-                        <p>Jadwal: <strong>{new Date(antreanHariIni.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}</strong></p>
+                        <p>Jadwal: <strong>{new Date(antreanHariIni.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta'})}</strong></p>
                         <p style={{ color: "var(--text-muted)", marginTop: "10px" }}>Silakan menunggu di bagian {antreanHariIni.poliklinikId ? 'Poli' : 'Poliklinik'}.</p>
                     </>
                 ) : (
