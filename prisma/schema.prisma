@@ -13,6 +13,24 @@ model User {
   role      Role
   createdAt DateTime @default(now())
   pasien    Pasien?
+  dokter    Dokter?
+}
+
+model Poliklinik {
+  id       Int       @id @default(autoincrement())
+  namaPoli String    @unique
+  dokters  Dokter[]
+  antreans Antrean[]
+}
+
+model Dokter {
+  id           Int        @id @default(autoincrement())
+  userId       Int        @unique
+  namaLengkap  String
+  spesialisasi String
+  poliklinikId Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  poliklinik   Poliklinik @relation(fields: [poliklinikId], references: [id], onDelete: Cascade)
 }
 
 model Pasien {
@@ -29,14 +47,16 @@ model Pasien {
 }
 
 model Antrean {
-  id         Int           @id @default(autoincrement())
-  pasienId   Int
-  tanggal    DateTime      @db.Date
-  noAntrean  Int
-  status     StatusAntrean @default(MENUNGGU)
-  pasien     Pasien        @relation(fields: [pasienId], references: [id], onDelete: Cascade)
-  rekamMedis RekamMedis?
-  tagihan    Tagihan?
+  id           Int           @id @default(autoincrement())
+  pasienId     Int
+  poliklinikId Int
+  tanggal      DateTime      @db.Date
+  noAntrean    Int
+  status       StatusAntrean @default(MENUNGGU)
+  pasien       Pasien        @relation(fields: [pasienId], references: [id], onDelete: Cascade)
+  poliklinik   Poliklinik    @relation(fields: [poliklinikId], references: [id], onDelete: Cascade)
+  rekamMedis   RekamMedis?
+  tagihan      Tagihan?
 }
 
 model RekamMedis {

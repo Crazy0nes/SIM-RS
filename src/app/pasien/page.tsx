@@ -20,11 +20,15 @@ export default async function PasienDashboard() {
     where: { userId: session.id },
     include: {
       antreans: {
-        where: { tanggal: todayUTC },
-        orderBy: { id: 'desc' },
+        where: { tanggal: { gte: todayUTC } },
+        orderBy: [ { tanggal: 'asc' }, { id: 'asc' } ],
         take: 1
       }
     }
+  });
+
+  const poliklinikList = await prisma.poliklinik.findMany({
+    orderBy: { namaPoli: 'asc' }
   });
 
   const antreanHariIni = pasien?.antreans[0];
@@ -62,7 +66,8 @@ export default async function PasienDashboard() {
                             {String(antreanHariIni.noAntrean).padStart(3, '0')}
                         </div>
                         <p>Status: <strong style={{ color: "var(--primary-color)", textTransform: "uppercase" }}>{antreanHariIni.status}</strong></p>
-                        <p style={{ color: "var(--text-muted)", marginTop: "10px" }}>Silakan menunggu di ruang tunggu poli.</p>
+                        <p>Jadwal: <strong>{new Date(antreanHariIni.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}</strong></p>
+                        <p style={{ color: "var(--text-muted)", marginTop: "10px" }}>Silakan menunggu di bagian {antreanHariIni.poliklinikId ? 'Poli' : 'Poliklinik'}.</p>
                     </>
                 ) : (
                     <>
@@ -71,7 +76,7 @@ export default async function PasienDashboard() {
                         </div>
                         <p>Anda belum mengambil tiket antrean hari ini.</p>
                         {pasien ? (
-                           <AmbilAntreanButton />
+                           <AmbilAntreanButton poliklinikList={poliklinikList} />
                         ) : (
                            <p style={{ color: 'red' }}>Anda belum melengkapi form pendaftaran pasien.</p>
                         )}

@@ -15,8 +15,20 @@ export default async function DokterDashboard() {
 
   const todayUTC = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
 
+  const dokter = await prisma.dokter.findUnique({
+    where: { userId: session.id },
+    include: { poliklinik: true }
+  });
+
+  if (!dokter) {
+    return <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>Akun Anda belum dipetakan sebagai Dokter di database. Hubungi Manajemen.</div>;
+  }
+
   const antreans = await prisma.antrean.findMany({
-    where: { tanggal: todayUTC },
+    where: { 
+      tanggal: todayUTC,
+      poliklinikId: dokter.poliklinikId 
+    },
     include: {
       pasien: true
     },
@@ -44,7 +56,7 @@ export default async function DokterDashboard() {
 
         <main className="main-content">
             <div className="topbar">
-                <h2>Dashboard Antrean Pasien</h2>
+                <h2>Dashboard Antrean Pasien - {dokter.poliklinik.namaPoli}</h2>
                 <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
             </div>
 

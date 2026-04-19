@@ -22,14 +22,14 @@ export async function logoutUser() {
   redirect('/')
 }
 
-export async function ambilAntrean() {
+export async function ambilAntrean(poliklinikId: number, tanggalStr: string) {
   const session = await getUserSession()
   if (!session || session.role !== 'PASIEN') {
     return { error: 'Anda tidak memiliki akses.' }
   }
 
   try {
-    // 1. Dapatkan pasienId dari userId
+    // Dapatkan pasienId dari userId
     const pasien = await prisma.pasien.findUnique({
       where: { userId: session.id }
     })
@@ -38,31 +38,33 @@ export async function ambilAntrean() {
       return { error: 'Data detail pasien belum lengkap.' }
     }
 
-    const todayUTC = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+    const targetDateUTC = new Date(tanggalStr + 'T00:00:00.000Z');
 
     const existingAntrean = await prisma.antrean.findFirst({
       where: {
         pasienId: pasien.id,
-        tanggal: todayUTC
+        tanggal: targetDateUTC
       }
     })
 
     if (existingAntrean) {
-      return { error: 'Anda sudah mengambil antrean hari ini.' }
+      return { error: 'Anda sudah mengambil antrean untuk tanggal tersebut.' }
     }
 
-    // Hitung nomor antrean terakhir hari ini untuk menentukan nomor antrean selanjutnya
+    // Hitung antrean di POLI yang sama, pada TANGGAL tersebut
     const antreanCount = await prisma.antrean.count({
       where: {
-        tanggal: todayUTC
+        poliklinikId: poliklinikId,
+        tanggal: targetDateUTC
       }
     })
 
-    // 3. Buat antrean baru
+    // Buat antrean baru
     await prisma.antrean.create({
       data: {
         pasienId: pasien.id,
-        tanggal: new Date(),
+        poliklinikId: poliklinikId,
+        tanggal: targetDateUTC,
         noAntrean: antreanCount + 1,
         status: 'MENUNGGU'
       }
@@ -70,8 +72,8 @@ export async function ambilAntrean() {
 
     revalidatePath('/pasien')
     return { success: true }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Antrean error:", error);
-    return { error: 'Gagal mengambil antrean: ' + error.message }
+    return { error: 'Gagal mengambil antrean: ' + (error as Error).message }
   }
 }
