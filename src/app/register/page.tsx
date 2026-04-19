@@ -19,6 +19,22 @@ export default function Register() {
 
     const formData = new FormData(e.currentTarget);
 
+    // Mencegah Next.js / Vercel mendeteksi payload file berukuran besar yang bisa membuat server crash HTTP 413.
+    // Karena sebagai MVP kita hanya mengoleksi namanya saja, kita pisahkan nama filenya:
+    const ktpFile = formData.get('dokumen_ktp') as File;
+    const bpjsFile = formData.get('dokumen_bpjs') as File;
+
+    if (ktpFile && ktpFile.name) {
+      formData.set('ktp_name', ktpFile.name);
+    }
+    if (bpjsFile && bpjsFile.name) {
+      formData.set('bpjs_name', bpjsFile.name);
+    }
+
+    // Cabut file gambar aslinya yang bisa mencapai bermega-mega byte dari payload pengiriman form
+    formData.delete('dokumen_ktp');
+    formData.delete('dokumen_bpjs');
+
     try {
       const result = await registerPasien(null, formData);
       

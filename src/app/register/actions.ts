@@ -12,10 +12,11 @@ export async function registerPasien(prevState: any, formData: FormData) {
     const nik = formData.get('nik') as string;
     const no_bpjs = formData.get('no_bpjs') as string || null;
     
-    const dokumen_ktp = formData.get('dokumen_ktp') as File;
-    const dokumen_bpjs = formData.get('dokumen_bpjs') as File | null;
+    // Kita menangkap nama file-nya saja hasil intercept dari Client Side
+    const ktp_name = formData.get('ktp_name') as string | null;
+    const bpjs_name = formData.get('bpjs_name') as string | null;
 
-    if (!username || !password || !nama_lengkap || !nik || !dokumen_ktp) {
+    if (!username || !password || !nama_lengkap || !nik || !ktp_name) {
       return { error: 'Semua field dengan tanda bintang (*) wajib diisi.' }
     }
 
@@ -28,14 +29,14 @@ export async function registerPasien(prevState: any, formData: FormData) {
     let ktpPath = null;
     let bpjsPath = null;
 
-    // Catatan: Vercel menerapkan Read-Only File System, sehingga fs.writeFile tidak akan bekerja di server produksi.
+    // Vercel menerapkan Read-Only File System, sehingga fs.writeFile tidak akan bekerja di server produksi.
     // Sebagai MVP sementara sebelum mengintegrasikan Vercel Blob/S3, kita hanya akan menyimpan nama filenya saja.
-    if (dokumen_ktp && dokumen_ktp.size > 0) {
-      ktpPath = `/uploads/dummy_${dokumen_ktp.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
+    if (ktp_name) {
+      ktpPath = `/uploads/dummy_${ktp_name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
     }
     
-    if (dokumen_bpjs && dokumen_bpjs.size > 0) {
-      bpjsPath = `/uploads/dummy_${dokumen_bpjs.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
+    if (bpjs_name) {
+      bpjsPath = `/uploads/dummy_${bpjs_name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
     }
 
     await prisma.$transaction(async (tx) => {
@@ -60,7 +61,7 @@ export async function registerPasien(prevState: any, formData: FormData) {
     });
 
     return { success: true, message: 'Pendaftaran berhasil dibuat! Anda bisa login sekarang.' }
-  } catch (error: any) {
-    return { error: 'Kesalahan server internal' }
+  } catch (error: unknown) {
+    return { error: 'Kesalahan server internal: ' + (error as Error).message }
   }
 }
