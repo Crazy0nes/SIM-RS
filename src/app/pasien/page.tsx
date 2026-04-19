@@ -13,7 +13,8 @@ export default async function PasienDashboard() {
     redirect('/login');
   }
 
-  const todayUTC = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+  const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
+  const todayUTC = new Date(dateStr + 'T00:00:00.000Z');
 
   // Tarik data detail pasien beserta antrean hari ini
   const pasien = await prisma.pasien.findUnique({

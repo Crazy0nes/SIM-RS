@@ -38,7 +38,8 @@ export async function ambilAntrean(poliklinikId: number) {
       return { error: 'Data detail pasien belum lengkap.' }
     }
 
-    const targetDateUTC = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+    const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
+    const targetDateUTC = new Date(dateStr + 'T00:00:00.000Z');
 
     const existingAntrean = await prisma.antrean.findFirst({
       where: {

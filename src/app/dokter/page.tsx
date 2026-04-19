@@ -13,7 +13,8 @@ export default async function DokterDashboard() {
     redirect('/login');
   }
 
-  const todayUTC = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+  const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
+  const todayUTC = new Date(dateStr + 'T00:00:00.000Z');
 
   const dokter = await prisma.dokter.findUnique({
     where: { userId: session.id },
