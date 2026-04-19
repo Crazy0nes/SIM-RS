@@ -8,18 +8,16 @@ export default function AmbilAntreanButton({ poliklinikList }: { poliklinikList:
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [poliId, setPoliId] = useState('')
-  const [tanggal, setTanggal] = useState('')
   const router = useRouter()
 
   const handleAmbil = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!poliId) return setError('Pilih poliklinik terlebih dahulu.')
-    if (!tanggal) return setError('Pilih tanggal berobat.')
 
     setLoading(true)
     setError('')
     try {
-      const res = await ambilAntrean(parseInt(poliId, 10), tanggal)
+      const res = await ambilAntrean(parseInt(poliId, 10))
       if (res?.error) {
         setError(res.error)
         alert(res.error)
@@ -48,19 +46,6 @@ export default function AmbilAntreanButton({ poliklinikList }: { poliklinikList:
             <option key={poly.id} value={poly.id}>{poly.namaPoli}</option>
           ))}
         </select>
-      </div>
-      
-      <div>
-        <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Tanggal Berobat</label>
-        <input 
-          type="date" 
-          value={tanggal} 
-          onChange={(e) => setTanggal(e.target.value)}
-          className="form-control"
-          required
-          min={new Date().toISOString().split('T')[0]} // hanya hari ini/ke depan
-          style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid var(--border-color)' }}
-        />
       </div>
 
       <button 

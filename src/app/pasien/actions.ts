@@ -22,7 +22,7 @@ export async function logoutUser() {
   redirect('/')
 }
 
-export async function ambilAntrean(poliklinikId: number, tanggalStr: string) {
+export async function ambilAntrean(poliklinikId: number) {
   const session = await getUserSession()
   if (!session || session.role !== 'PASIEN') {
     return { error: 'Anda tidak memiliki akses.' }
@@ -38,7 +38,7 @@ export async function ambilAntrean(poliklinikId: number, tanggalStr: string) {
       return { error: 'Data detail pasien belum lengkap.' }
     }
 
-    const targetDateUTC = new Date(tanggalStr + 'T00:00:00.000Z');
+    const targetDateUTC = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
 
     const existingAntrean = await prisma.antrean.findFirst({
       where: {
