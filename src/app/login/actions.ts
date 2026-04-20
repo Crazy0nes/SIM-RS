@@ -35,7 +35,11 @@ export async function loginUser(prevState: any, formData: FormData) {
     })
 
     rolePath = user.role.toLowerCase()
-
+    
+    // Custom mapping for roles that don't match folder names 1:1
+    if (user.role === 'APOTEKER') {
+      rolePath = 'farmasi';
+    }
   } catch(e: any) {
     return { error: 'Terjadi kesalahan internal server: ' + e.message }
   }
