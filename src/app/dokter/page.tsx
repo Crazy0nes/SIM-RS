@@ -92,7 +92,7 @@ export default async function DokterDashboard() {
                                 {row.status === 'MENUNGGU' ? (
                                     <PeriksaButton antreanId={row.id} />
                                 ) : (
-                                    <button className="btn btn-outline" style={{ padding:"6px 12px", fontSize:"14px" }}>Lanjut EMR</button>
+                                    <Link href={`/dokter/rme/${row.id}`} className="btn btn-outline" style={{ padding:"6px 12px", fontSize:"14px", textDecoration:"none", display:"inline-block" }}>Lanjut EMR</Link>
                                 )}
                             </td>
                         </tr>

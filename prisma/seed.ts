@@ -87,6 +87,28 @@ async function main() {
     }
   })
 
+  // 5. Create Sample Apoteker (Pharmacy User)
+  await prisma.user.upsert({
+    where: { username: "apoteker_rs" },
+    update: {},
+    create: {
+      username: "apoteker_rs",
+      password: "password123",
+      role: Role.APOTEKER
+    }
+  })
+
+  // 6. Create Sample Kasir (Cashier User)
+  await prisma.user.upsert({
+    where: { username: "kasir_rs" },
+    update: {},
+    create: {
+      username: "kasir_rs",
+      password: "password123",
+      role: Role.KASIR
+    }
+  })
+
   console.log(`Seeding finished.`)
 }
 
