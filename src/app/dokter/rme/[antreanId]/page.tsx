@@ -4,8 +4,9 @@ import { getUserSession } from '../../../pasien/actions';
 import { redirect } from 'next/navigation';
 import { simpanRekamMedis } from '../actions';
 
-export default async function RMEDetailPage({ params }: { params: { antreanId: string } }) {
-  const antreanId = parseInt(params.antreanId);
+export default async function RMEDetailPage({ params }: { params: Promise<{ antreanId: string }> }) {
+  const resolvedParams = await params;
+  const antreanId = parseInt(resolvedParams.antreanId);
   const session = await getUserSession();
   
   if (!session || session.role !== 'DOKTER') {

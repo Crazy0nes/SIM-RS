@@ -5,7 +5,7 @@ import PrintButton from './PrintButton';
 
 export const dynamic = 'force-dynamic';
 
-export default async function KuitansiPrintPage({ params }: { params: { id: string } }) {
+export default async function KuitansiPrintPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getUserSession();
   
   // Kasir or Admin validation to print
@@ -13,7 +13,8 @@ export default async function KuitansiPrintPage({ params }: { params: { id: stri
     redirect('/login');
   }
 
-  const tagihanId = parseInt(params.id);
+  const resolvedParams = await params;
+  const tagihanId = parseInt(resolvedParams.id);
 
   const tagihan = await prisma.tagihan.findUnique({
     where: { id: tagihanId },
