@@ -53,6 +53,7 @@ export default async function DokterDashboard({
             <ul className="sidebar-menu">
                 <li><Link href="/dokter" className="active">Daftar Antrean</Link></li>
                 <li><Link href="/dokter/riwayat-emr">Riwayat EMR</Link></li>
+                <li><Link href="/dokter/debug">Debug Info</Link></li>
                 <li style={{ marginTop: "auto" }}>
                   <form action={logoutUser}>
                     <button type="submit" style={{ background: "rgba(255,0,0,0.2)", color: "#ffdddd", width: "100%", textAlign: "left", padding: "0.75rem 1rem", border: "none", borderRadius: "var(--radius-md)", cursor: "pointer" }}>

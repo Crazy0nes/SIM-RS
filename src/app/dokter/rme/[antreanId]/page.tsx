@@ -20,6 +20,8 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
   }
 
   try {
+    // Quick mitigation: avoid extra DB count checks
+
     const antrean = await prisma.antrean.findUnique({
       where: { id: antreanId },
       include: {
@@ -47,6 +49,7 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
             <div className="sidebar-title">RS Tentara P. Siantar<br/><span style={{ fontSize: "14px", fontWeight: "400", color: "#c8e6c9" }}>Portal Dokter</span></div>
             <ul className="sidebar-menu">
                 <li><Link href="/dokter">Kembali ke Antrean</Link></li>
+                <li><Link href="/dokter/debug">Debug Info</Link></li>
                 <li><Link href="#" className="active">Isi EMR Pasien</Link></li>
             </ul>
         </aside>
@@ -156,10 +159,40 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
       </div>
   );
   } catch (error) {
-    console.error('Error loading EMR page:', error);
-    return <div style={{ padding: "2rem", color: "red", textAlign: "center" }}>
-      Terjadi kesalahan server saat memuat halaman EMR.<br/>
-      <small>Error: {error instanceof Error ? error.message : 'Unknown error'}</small>
-    </div>;
+    console.error('EMR Page Error:', error);
+
+    // Different error messages based on error type
+    let errorMessage = 'Terjadi kesalahan server saat memuat halaman EMR.';
+    let errorDetails = '';
+
+    if (error instanceof Error) {
+      if (error.message.includes('connect')) {
+        errorMessage = 'Gagal terhubung ke database.';
+        errorDetails = 'Periksa koneksi internet dan konfigurasi database.';
+      } else if (error.message.includes('relation') || error.message.includes('table')) {
+        errorMessage = 'Error struktur database.';
+        errorDetails = 'Periksa schema Prisma dan migrasi database.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Timeout koneksi database.';
+        errorDetails = 'Database response terlalu lama.';
+      } else {
+        errorDetails = error.message;
+      }
+    }
+
+    return (
+      <div style={{ padding: "2rem", color: "red", textAlign: "center", background: "#ffebee", borderRadius: "8px", border: "1px solid #f44336" }}>
+        <h2>❌ Error Memuat Halaman EMR</h2>
+        <p><strong>{errorMessage}</strong></p>
+        {errorDetails && <p><small>Detail: {errorDetails}</small></p>}
+        <p style={{ marginTop: "1rem" }}>
+          <Link href="/dokter/debug" style={{ color: "blue", textDecoration: "underline" }}>
+            Akses Halaman Debug
+          </Link> | <Link href="/dokter" style={{ color: "blue", textDecoration: "underline" }}>
+            Kembali ke Dashboard
+          </Link>
+        </p>
+      </div>
+    );
   }
 }
