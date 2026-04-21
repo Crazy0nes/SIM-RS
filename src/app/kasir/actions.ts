@@ -21,6 +21,7 @@ export async function prosesPembayaran(tagihanId: number) {
     console.error(err);
     throw new Error('Gagal memproses pembayaran tagihan.');
   }
+}
 
 export async function ajukanKlaimBpjs(tagihanId: number) {
   const session = await getUserSession()
@@ -37,10 +38,10 @@ export async function ajukanKlaimBpjs(tagihanId: number) {
           status: 'MENUNGGU'
         }
       });
-      // For now, we keep Tagihan BELUM_DIBAYAR, or we can mark it LUNAS directly since it's going to BPJS.
-      // But typically it wait for BPJS approval. To hide it from Kasir Active Tagihans, we can mark it LUNAS, or change our query.
-      // Easiest MVP: Mark tagihan status as LUNAS because from the patient's view, it's paid by insurance. 
-      // The BPJS dashboard will track the actual klaim status.
+      // Biarkan tagihan BELUM_DIBAYAR sementara, atau langsung LUNAS karena klaim BPJS.
+      // Tunggu approval BPJS. Sembunyikan dari daftar kasir dengan mark LUNAS.
+      // MVP: Mark LUNAS, pasien anggap sudah bayar.
+      // BPJS dashboard track status klaim.
       await tx.tagihan.update({
         where: { id: tagihanId },
         data: { status: 'LUNAS' }
