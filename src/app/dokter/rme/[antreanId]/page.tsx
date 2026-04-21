@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getUserSession } from '../../../pasien/actions';
 import { redirect } from 'next/navigation';
 import { simpanRekamMedis } from '../actions';
+import ConfirmSubmitButton from '../ConfirmSubmitButton';
 
 export default async function RMEDetailPage({ params }: { params: Promise<{ antreanId: string }> }) {
   const resolvedParams = await params;
@@ -84,8 +85,8 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                     ℹ️ Data EMR sudah ada. Edit dan perbarui sesuai kebutuhan.
                   </div>
                 )}
-                <form action={simpanRekamMedis} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                    <input type="hidden" name="antreanId" value={antrean.id} />
+                <form id="rmeForm" action={simpanRekamMedis} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                  <input type="hidden" name="antreanId" value={antrean.id} />
                     
                     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", background: "#f8f9fa", padding: "15px", borderRadius: "8px" }}>
                         <h4 style={{ color: "var(--primary-color)", margin: 0 }}>Subjective (Subjektif)</h4>
@@ -145,13 +146,8 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ padding: "12px", fontSize: "16px", marginTop: "1rem" }} onClick={(e) => {
-                        if (!confirm('Apakah Anda yakin ingin menyimpan EMR dan menyelesaikan antrean pasien ini?')) {
-                            e.preventDefault();
-                        }
-                    }}>
-                        Simpan EMR &amp; Selesaikan Antrean
-                    </button>
+                    {/* Client-side button for confirmation before submitting server action */}
+                    <ConfirmSubmitButton formId="rmeForm" />
                     
                 </form>
             </div>
