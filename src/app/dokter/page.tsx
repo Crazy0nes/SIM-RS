@@ -6,7 +6,12 @@ import PeriksaButton from './PeriksaButton';
 
 export const dynamic = 'force-dynamic';
 
-export default async function DokterDashboard() {
+export default async function DokterDashboard({
+  searchParams
+}: {
+  searchParams: Promise<{ success?: string }>
+}) {
+  const resolvedParams = await searchParams;
   const session = await getUserSession();
   
   if (!session || session.role !== 'DOKTER') {
@@ -28,7 +33,10 @@ export default async function DokterDashboard() {
   const antreans = await prisma.antrean.findMany({
     where: { 
       tanggal: todayUTC,
-      poliklinikId: dokter.poliklinikId 
+      poliklinikId: dokter.poliklinikId,
+      status: {
+        in: ['MENUNGGU', 'DIPERIKSA']
+      }
     },
     include: {
       pasien: true
@@ -60,6 +68,12 @@ export default async function DokterDashboard() {
                 <h2>Dashboard Antrean Pasien - {dokter.poliklinik.namaPoli}</h2>
                 <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}</div>
             </div>
+
+            {resolvedParams.success === 'emr_saved' && (
+              <div className="alert alert-success" style={{ marginBottom: '1rem', padding: '12px 16px', background: '#e8f5e9', color: '#1b5e20', borderRadius: '8px', borderLeft: '4px solid #4caf50' }}>
+                ✓ EMR berhasil disimpan dan antrean pasien telah diselesaikan.
+              </div>
+            )}
 
             <div className="card">
                 <h3>Daftar Pasien Menunggu Hari Ini</h3>

@@ -141,7 +141,7 @@ export async function simpanRekamMedis(formData: FormData) {
     throw new Error('Gagal menyimpan rekam medis.');
   }
 
-  // Redirect kembali ke halaman antrean dokter
+  // Revalidate dan redirect kembali ke halaman antrean dokter dengan notifikasi sukses
   revalidatePath('/dokter')
-  redirect('/dokter')
+  redirect('/dokter?success=emr_saved')
 }

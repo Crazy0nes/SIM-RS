@@ -17,12 +17,17 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
     where: { id: antreanId },
     include: {
       pasien: true,
-      poliklinik: true
+      poliklinik: true,
+      rekamMedis: true
     }
   });
 
   if (!antrean) {
     return <div style={{ padding: "2rem", color: "red", textAlign: "center" }}>Antrean tidak ditemukan!</div>;
+  }
+
+  if (antrean.status === 'SELESAI') {
+    return <div style={{ padding: "2rem", color: "orange", textAlign: "center", background: "#fff3e0", borderRadius: "8px" }}>Antrean pasien ini sudah diselesaikan. Halaman ini hanya untuk informasi riwayat.</div>;
   }
 
   return (
@@ -121,7 +126,11 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ padding: "12px", fontSize: "16px", marginTop: "1rem" }}>
+                    <button type="submit" className="btn btn-primary" style={{ padding: "12px", fontSize: "16px", marginTop: "1rem" }} onClick={(e) => {
+                        if (!confirm('Apakah Anda yakin ingin menyimpan EMR dan menyelesaikan antrean pasien ini?')) {
+                            e.preventDefault();
+                        }
+                    }}>
                         Simpan EMR &amp; Selesaikan Antrean
                     </button>
                     
