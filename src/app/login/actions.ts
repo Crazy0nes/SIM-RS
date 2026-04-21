@@ -34,13 +34,21 @@ export async function loginUser(prevState: any, formData: FormData) {
       maxAge: 60 * 60 * 24 * 7 // 1 minggu
     })
 
-    rolePath = user.role.toLowerCase()
-    
-    // Custom mapping for roles that don't match folder names 1:1
-    if (user.role === 'APOTEKER') {
-      rolePath = 'farmasi';
+    const roleMap: Record<string, string> = {
+      PASIEN: 'pasien',
+      DOKTER: 'dokter',
+      APOTEKER: 'farmasi',
+      LAB: 'lab',
+      BPJS: 'bpjs',
+      KASIR: 'kasir'
+    }
+
+    rolePath = roleMap[user.role]
+    if (!rolePath) {
+      return { error: `Role ${user.role} belum punya halaman dashboard.` }
     }
   } catch(e: any) {
+    console.error('Login error:', e)
     return { error: 'Terjadi kesalahan internal server: ' + e.message }
   }
   
