@@ -6,33 +6,40 @@ import { simpanRekamMedis } from '../actions';
 
 export default async function RMEDetailPage({ params }: { params: Promise<{ antreanId: string }> }) {
   const resolvedParams = await params;
-  const antreanId = parseInt(resolvedParams.antreanId);
+  const antreanIdStr = resolvedParams.antreanId;
+  
+  if (!antreanIdStr || isNaN(parseInt(antreanIdStr))) {
+    return <div style={{ padding: "2rem", color: "red", textAlign: "center" }}>ID Antrean tidak valid!</div>;
+  }
+  
+  const antreanId = parseInt(antreanIdStr);
   const session = await getUserSession();
   
   if (!session || session.role !== 'DOKTER') {
     redirect('/login');
   }
 
-  const antrean = await prisma.antrean.findUnique({
-    where: { id: antreanId },
-    include: {
-      pasien: true,
-      poliklinik: true
+  try {
+    const antrean = await prisma.antrean.findUnique({
+      where: { id: antreanId },
+      include: {
+        pasien: true,
+        poliklinik: true
+      }
+    });
+
+    if (!antrean) {
+      return <div style={{ padding: "2rem", color: "red", textAlign: "center" }}>Antrean tidak ditemukan!</div>;
     }
-  });
 
-  if (!antrean) {
-    return <div style={{ padding: "2rem", color: "red", textAlign: "center" }}>Antrean tidak ditemukan!</div>;
-  }
+    if (antrean.status === 'SELESAI') {
+      return <div style={{ padding: "2rem", color: "orange", textAlign: "center", background: "#fff3e0", borderRadius: "8px" }}>Antrean pasien ini sudah diselesaikan. Halaman ini hanya untuk informasi riwayat.</div>;
+    }
 
-  if (antrean.status === 'SELESAI') {
-    return <div style={{ padding: "2rem", color: "orange", textAlign: "center", background: "#fff3e0", borderRadius: "8px" }}>Antrean pasien ini sudah diselesaikan. Halaman ini hanya untuk informasi riwayat.</div>;
-  }
-
-  // Ambil data EMR jika sudah ada
-  const rekamMedis = await prisma.rekamMedis.findUnique({
-    where: { antreanId }
-  });
+    // Ambil data EMR jika sudah ada
+    const rekamMedis = await prisma.rekamMedis.findUnique({
+      where: { antreanId }
+    });
 
   return (
       <div className="dashboard-layout">
@@ -148,4 +155,11 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
         </main>
       </div>
   );
+  } catch (error) {
+    console.error('Error loading EMR page:', error);
+    return <div style={{ padding: "2rem", color: "red", textAlign: "center" }}>
+      Terjadi kesalahan server saat memuat halaman EMR.<br/>
+      <small>Error: {error instanceof Error ? error.message : 'Unknown error'}</small>
+    </div>;
+  }
 }
