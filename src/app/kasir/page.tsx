@@ -90,9 +90,22 @@ export default async function KasirDashboard() {
                             <Link href={`/kasir/kuitansi/${tagihan.id}`} className="btn btn-outline" style={{ display: "inline-block", padding: "10px 15px", fontSize: "14px", textDecoration: "none" }} target="_blank">
                                 Cetak Kuitansi Sementara (PDF)
                             </Link>
+
+                            {tagihan.antrean.pasien.noBpjs && tagihan.antrean.pasien.noBpjs.trim() !== '' ? (
+                                <form action={async () => {
+                                    'use server';
+                                    const { ajukanKlaimBpjs } = await import('./actions');
+                                    await ajukanKlaimBpjs(tagihan.id);
+                                }}>
+                                    <button type="submit" className="btn btn-primary" style={{ padding: "10px 15px", fontSize: "14px", background: "#1976d2", borderColor: "#1976d2" }}>
+                                        🏥 Ajukan Klaim BPJS
+                                    </button>
+                                </form>
+                            ) : null}
+
                             <form action={prosesPembayaran.bind(null, tagihan.id)}>
                                 <button type="submit" className="btn btn-primary" style={{ padding: "10px 15px", fontSize: "14px" }}>
-                                    Proses Lunas
+                                    Proses Lunas Tunai
                                 </button>
                             </form>
                         </div>

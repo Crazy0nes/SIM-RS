@@ -106,7 +106,7 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                     </div>
 
                     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", background: "#f8f9fa", padding: "15px", borderRadius: "8px" }}>
-                         <h4 style={{ color: "var(--primary-color)", margin: 0 }}>Plan (Perencanaan / Edukasi)</h4>
+                         <h4 style={{ color: "var(--primary-color)", margin: 0 }}>Plan (Perencanaan / Edukasi / Rujukan)</h4>
                          <div className="form-group">
                             <label>Catatan Tambahan &amp; Edukasi Pasien *</label>
                             <textarea name="catatanTambahan" className="form-control" rows={3} required placeholder="Contoh: Istirahat yang cukup, kurangi makanan asin..."></textarea>
@@ -114,6 +114,10 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                         <div className="form-group">
                             <label>Resep Obat (Opsional)</label>
                             <textarea name="rincianObat" className="form-control" rows={3} placeholder="Format bebas. Contoh: Paracetamol 500mg 3x1, Amoxicillin 500mg 3x1... Jika diisi, resep akan langsung diteruskan ke Apotek."></textarea>
+                        </div>
+                        <div className="form-group">
+                            <label>Permintaan Tes Laboratorium (Opsional)</label>
+                            <textarea name="permintaanLab" className="form-control" rows={2} placeholder="Ketik jenis tes darah/urin jika anda merujuk pasien ke Lab..."></textarea>
                         </div>
                     </div>
 

@@ -21,7 +21,7 @@ export async function simpanRekamMedis(formData: FormData) {
   const diagnosa = formData.get('diagnosa') as string
   const catatanTambahan = formData.get('catatanTambahan') as string
   const rincianObat = formData.get('rincianObat') as string
-
+  const permintaanLab = formData.get('permintaanLab') as string
   if (!antreanId || !keluhanUtama || !riwayatPenyakit || !tekananDarah || !suhuTubuhStr || !beratBadanStr || !tinggiBadanStr || !diagnosa || !catatanTambahan) {
      throw new Error('Semua field RME wajib diisi.');
   }
@@ -72,6 +72,26 @@ export async function simpanRekamMedis(formData: FormData) {
                data: {
                   rekamMedisId: rm.id,
                   rincianObat,
+                  status: 'MENUNGGU'
+               }
+            });
+        }
+      }
+
+      if (permintaanLab && permintaanLab.trim().length > 0) {
+        const existingLab = await tx.lab.findFirst({
+           where: { rekamMedisId: rm.id }
+        });
+        if (existingLab) {
+            await tx.lab.update({
+               where: { id: existingLab.id },
+               data: { jenisTes: permintaanLab }
+            });
+        } else {
+            await tx.lab.create({
+               data: {
+                  rekamMedisId: rm.id,
+                  jenisTes: permintaanLab,
                   status: 'MENUNGGU'
                }
             });

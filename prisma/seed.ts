@@ -30,7 +30,7 @@ async function main() {
     update: {},
     create: {
       username: "admin_rs",
-      password: "password123", // Dummy plaintext for MVP, in real should be hashed
+      password: "password123", // Dummy plaintext for prototype, in real should be hashed
       role: Role.MANAJEMEN
     }
   })
@@ -106,6 +106,28 @@ async function main() {
       username: "kasir_rs",
       password: "password123",
       role: Role.KASIR
+    }
+  })
+
+  // 7. Create Sample Laboratorium User
+  await prisma.user.upsert({
+    where: { username: "lab_rs" },
+    update: {},
+    create: {
+      username: "lab_rs",
+      password: "password123",
+      role: Role.LAB
+    }
+  })
+
+  // 8. Create Sample BPJS / Asuransi User
+  await prisma.user.upsert({
+    where: { username: "bpjs_rs" },
+    update: {},
+    create: {
+      username: "bpjs_rs",
+      password: "password123",
+      role: Role.BPJS
     }
   })
 
