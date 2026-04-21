@@ -17,8 +17,7 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
     where: { id: antreanId },
     include: {
       pasien: true,
-      poliklinik: true,
-      rekamMedis: true
+      poliklinik: true
     }
   });
 
@@ -29,6 +28,11 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
   if (antrean.status === 'SELESAI') {
     return <div style={{ padding: "2rem", color: "orange", textAlign: "center", background: "#fff3e0", borderRadius: "8px" }}>Antrean pasien ini sudah diselesaikan. Halaman ini hanya untuk informasi riwayat.</div>;
   }
+
+  // Ambil data EMR jika sudah ada
+  const rekamMedis = await prisma.rekamMedis.findUnique({
+    where: { antreanId }
+  });
 
   return (
       <div className="dashboard-layout">
@@ -65,6 +69,11 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
 
             <div className="card">
                 <h3 style={{ borderBottom: "1px solid var(--border-color)", paddingBottom: "10px", marginBottom: "15px" }}>Form Assessment SOAP</h3>
+                {rekamMedis && (
+                  <div style={{ marginBottom: "1rem", padding: "12px", background: "#e8f5e9", color: "#1b5e20", borderRadius: "8px", borderLeft: "4px solid #4caf50" }}>
+                    ℹ️ Data EMR sudah ada. Edit dan perbarui sesuai kebutuhan.
+                  </div>
+                )}
                 <form action={simpanRekamMedis} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                     <input type="hidden" name="antreanId" value={antrean.id} />
                     
@@ -72,11 +81,11 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                         <h4 style={{ color: "var(--primary-color)", margin: 0 }}>Subjective (Subjektif)</h4>
                         <div className="form-group">
                             <label>Keluhan Utama *</label>
-                            <textarea name="keluhanUtama" className="form-control" rows={3} required placeholder="Contoh: Pasien mengeluhkan pusing sejak 2 hari yang lalu..."></textarea>
+                            <textarea name="keluhanUtama" className="form-control" rows={3} required placeholder="Contoh: Pasien mengeluhkan pusing sejak 2 hari yang lalu..." defaultValue={rekamMedis?.keluhanUtama || ''}></textarea>
                         </div>
                         <div className="form-group">
                             <label>Riwayat Penyakit *</label>
-                            <textarea name="riwayatPenyakit" className="form-control" rows={2} required placeholder="Contoh: Hipertensi, Asma, dsb..."></textarea>
+                            <textarea name="riwayatPenyakit" className="form-control" rows={2} required placeholder="Contoh: Hipertensi, Asma, dsb..." defaultValue={rekamMedis?.riwayatPenyakit || ''}></textarea>
                         </div>
                     </div>
 
@@ -85,19 +94,19 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                             <div className="form-group">
                                 <label>Tekanan Darah (mmHg) *</label>
-                                <input type="text" name="tekananDarah" className="form-control" required placeholder="Contoh: 120/80" />
+                                <input type="text" name="tekananDarah" className="form-control" required placeholder="Contoh: 120/80" defaultValue={rekamMedis?.tekananDarah || ''} />
                             </div>
                             <div className="form-group">
                                 <label>Suhu Tubuh (&deg;C) *</label>
-                                <input type="number" step="0.1" name="suhuTubuh" className="form-control" required placeholder="36.5" />
+                                <input type="number" step="0.1" name="suhuTubuh" className="form-control" required placeholder="36.5" defaultValue={rekamMedis?.suhuTubuh || ''} />
                             </div>
                             <div className="form-group">
                                 <label>Berat Badan (kg) *</label>
-                                <input type="number" step="0.1" name="beratBadan" className="form-control" required placeholder="65.0" />
+                                <input type="number" step="0.1" name="beratBadan" className="form-control" required placeholder="65.0" defaultValue={rekamMedis?.beratBadan || ''} />
                             </div>
                             <div className="form-group">
                                 <label>Tinggi Badan (cm) *</label>
-                                <input type="number" step="0.1" name="tinggiBadan" className="form-control" required placeholder="170.0" />
+                                <input type="number" step="0.1" name="tinggiBadan" className="form-control" required placeholder="170.0" defaultValue={rekamMedis?.tinggiBadan || ''} />
                             </div>
                         </div>
                     </div>
@@ -106,7 +115,7 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                          <h4 style={{ color: "var(--primary-color)", margin: 0 }}>Assessment (Diagnosa)</h4>
                          <div className="form-group">
                             <label>Diagnosa Medis *</label>
-                            <textarea name="diagnosa" className="form-control" rows={2} required placeholder="Contoh: R51 - Headache (ICD-10)"></textarea>
+                            <textarea name="diagnosa" className="form-control" rows={2} required placeholder="Contoh: R51 - Headache (ICD-10)" defaultValue={rekamMedis?.diagnosa || ''}></textarea>
                         </div>
                     </div>
 
@@ -114,7 +123,7 @@ export default async function RMEDetailPage({ params }: { params: Promise<{ antr
                          <h4 style={{ color: "var(--primary-color)", margin: 0 }}>Plan (Perencanaan / Edukasi / Rujukan)</h4>
                          <div className="form-group">
                             <label>Catatan Tambahan &amp; Edukasi Pasien *</label>
-                            <textarea name="catatanTambahan" className="form-control" rows={3} required placeholder="Contoh: Istirahat yang cukup, kurangi makanan asin..."></textarea>
+                            <textarea name="catatanTambahan" className="form-control" rows={3} required placeholder="Contoh: Istirahat yang cukup, kurangi makanan asin..." defaultValue={rekamMedis?.catatanTambahan || ''}></textarea>
                         </div>
                         <div className="form-group">
                             <label>Resep Obat (Opsional)</label>
