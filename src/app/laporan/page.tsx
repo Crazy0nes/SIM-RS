@@ -9,6 +9,12 @@ export default async function LaporanPage() {
     prisma.klaimBpjs.count(),
   ])
 
+  const today = new Date()
+  const from = new Date(today)
+  from.setDate(today.getDate() - 30)
+  const startISO = from.toISOString().slice(0, 10)
+  const endISO = today.toISOString().slice(0, 10)
+
   return (
     <div>
       <h1>Laporan Manajemen (Ringkasan)</h1>
@@ -19,7 +25,18 @@ export default async function LaporanPage() {
         <li>Jumlah Klaim BPJS: {klaimCount}</li>
       </ul>
 
-      <p><Link href="/">Kembali</Link></p>
+      <h2>Ekspor Laporan</h2>
+      <form method="get" action="/api/laporan/export">
+        <label style={{ display: 'block', marginBottom: 8 }}>
+          Dari: <input name="start" type="date" defaultValue={startISO} />
+        </label>
+        <label style={{ display: 'block', marginBottom: 8 }}>
+          Sampai: <input name="end" type="date" defaultValue={endISO} />
+        </label>
+        <button type="submit">Ekspor CSV</button>
+      </form>
+
+      <p style={{ marginTop: 16 }}><Link href="/">Kembali</Link></p>
     </div>
   )
 }

@@ -1,12 +1,25 @@
 import { prisma } from '../../lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { getUserSession } from '../pasien/actions'
+import { submitClaimToBPJS, checkClaimStatusFromBPJS } from '../../lib/bpjsClient'
 
 export async function submitKlaim(formData: FormData) {
   'use server'
   try {
     const tagihanId = Number(formData.get('tagihanId'))
-    await prisma.klaimBpjs.create({ data: { tagihanId } })
+    const klaim = await prisma.klaimBpjs.create({ data: { tagihanId } })
+    // Try submit to BPJS (simulated). Update klaim status based on response.
+    try {
+      const res = await submitClaimToBPJS(tagihanId)
+      if (res?.approved) {
+        await prisma.klaimBpjs.update({ where: { id: klaim.id }, data: { status: 'DISETUJUI' } })
+      } else {
+        await prisma.klaimBpjs.update({ where: { id: klaim.id }, data: { status: 'DITOLAK' } })
+      }
+    } catch (e) {
+      // keep klaim as MENUNGGU if external fails
+      console.error('BPJS submit error (simulated)', e)
+    }
     revalidatePath('/bpjs')
   } catch (err) {
     console.error('submitKlaim error', err)
@@ -31,5 +44,26 @@ export async function setujuiKlaim(klaimId: number) {
   } catch (err) {
     console.error(err);
     throw new Error('Gagal menyetujui klaim.');
+  }
+}
+
+export async function syncKlaimStatuses(formData?: FormData) {
+  'use server'
+  try {
+    const pending = await prisma.klaimBpjs.findMany({ where: { status: 'MENUNGGU' } })
+    for (const k of pending) {
+      try {
+        const res = await checkClaimStatusFromBPJS(k.id)
+        if (res?.status) {
+          await prisma.klaimBpjs.update({ where: { id: k.id }, data: { status: res.status } })
+        }
+      } catch (e) {
+        console.error('error checking claim', k.id, e)
+      }
+    }
+    revalidatePath('/bpjs')
+  } catch (e) {
+    console.error('syncKlaimStatuses error', e)
+    throw e
   }
 }

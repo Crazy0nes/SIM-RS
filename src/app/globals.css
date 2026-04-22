@@ -269,6 +269,51 @@
   }
 }
 
+/* Mobile specific tweaks to match wireframe */
+@media (max-width: 640px) {
+    .auth-card { max-width: 420px; padding: 1.5rem; border-radius: 22px; }
+    .auth-wrapper { padding: 1rem; }
+
+    .dashboard-layout { flex-direction: column; }
+    .sidebar { display: none; }
+    .main-content { padding: 1rem; }
+
+    .mobile-search { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .mobile-search input { flex: 1; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border-color); }
+
+    .mobile-list { display: flex; flex-direction: column; gap: 12px; }
+    .mobile-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        padding: 12px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+    .mobile-item .meta { flex: 1; margin-right: 8px; }
+    .mobile-item .meta .title { font-weight: 700; font-size: 15px; }
+    .mobile-item .meta .sub { font-size: 13px; color: var(--text-muted); }
+    .mobile-item .action-btn { background: var(--primary-color); color: white; padding: 8px 12px; border-radius: 12px; font-weight: 700; }
+
+    /* Floating bottom primary button (for forms) */
+    .floating-bottom-btn {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: 16px;
+        z-index: 60;
+        border-radius: var(--radius-full);
+        padding: 14px 18px;
+        font-size: 16px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Make form grids stack on mobile */
+    form .grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

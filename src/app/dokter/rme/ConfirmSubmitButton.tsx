@@ -20,7 +20,7 @@ export default function ConfirmSubmitButton({ formId }: { formId: string }) {
   }
 
   return (
-    <button type="button" className="btn btn-primary" style={{ padding: '12px', fontSize: '16px', marginTop: '1rem' }} onClick={handleClick}>
+    <button type="button" className="btn btn-primary floating-bottom-btn" style={{ padding: '12px', fontSize: '16px', marginTop: '1rem' }} onClick={handleClick}>
       Simpan EMR & Selesaikan Antrean
     </button>
   )

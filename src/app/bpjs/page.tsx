@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { submitKlaim } from './actions'
+import { submitKlaim, syncKlaimStatuses } from './actions'
 import { prisma } from '../../lib/prisma'
 
 export default async function BPJSPage() {
@@ -28,6 +28,10 @@ export default async function BPJSPage() {
           <label>Tagihan ID: <input name="tagihanId" type="number" required /></label>
         </div>
         <button type="submit">Kirim Klaim</button>
+      </form>
+
+      <form action={syncKlaimStatuses} style={{ marginTop: '1rem' }}>
+        <button type="submit">Sinkronkan Status Klaim (Manual)</button>
       </form>
 
       <p><Link href="/">Kembali</Link></p>

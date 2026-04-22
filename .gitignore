@@ -47,3 +47,4 @@ next-env.d.ts
 .venv/
 ProductBacklog_SIMRS.pdf
 BACKLOG_MAPPING.md
+src/lib/bpjsClient.ts

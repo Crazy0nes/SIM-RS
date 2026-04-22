@@ -64,6 +64,31 @@ export default async function DokterDashboard({
         </aside>
 
         <main className="main-content">
+            {/* Mobile search + list view */}
+            <div className="mobile-search" style={{ display: 'none' }}>
+              <input placeholder="Cari pasien atau no antrean..." />
+              <button className="btn btn-outline">🔍</button>
+            </div>
+
+            <div className="mobile-list" style={{ display: 'none' }}>
+              {antreans.map(a => (
+                <div key={a.id} className="mobile-item">
+                  <div className="meta">
+                    <div className="title">{String(a.noAntrean).padStart(3,'0')} — {a.pasien.namaLengkap}</div>
+                    <div className="sub">{a.pasien.nik ? 'NIK: ' + a.pasien.nik : ''}</div>
+                  </div>
+                  <div>
+                    {a.status === 'MENUNGGU' ? (
+                      <form action="/dokter" method="post">
+                        <button type="button" className="action-btn" style={{ background: 'var(--primary-color)', color: '#fff', border: 'none', padding: '8px 10px', borderRadius: 10 }}>Periksa</button>
+                      </form>
+                    ) : (
+                      <a href={`/dokter/rme/${a.id}`} className="action-btn">Lanjut</a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
             <div className="topbar">
                 <h2>Dashboard Antrean Pasien - {dokter.poliklinik.namaPoli}</h2>
                 <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}</div>
