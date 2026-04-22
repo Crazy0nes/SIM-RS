@@ -44,3 +44,6 @@ CLAUDE.md
 next-env.d.ts
 
 /src/generated/prisma
+.venv/
+ProductBacklog_SIMRS.pdf
+BACKLOG_MAPPING.md

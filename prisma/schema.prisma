@@ -44,6 +44,7 @@ model Pasien {
   dokumenBpjs String?
   alamat      String?
   antreans    Antrean[]
+  feedbacks   Feedback[]
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -118,6 +119,15 @@ model KlaimBpjs {
   tagihanId Int
   status    StatusKlaim @default(MENUNGGU)
   tagihan   Tagihan     @relation(fields: [tagihanId], references: [id], onDelete: Cascade)
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  pasienId  Int?
+  rating    Int      @default(5)
+  message   String
+  createdAt DateTime @default(now())
+  pasien    Pasien?  @relation(fields: [pasienId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

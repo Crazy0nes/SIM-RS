@@ -31,6 +31,12 @@ export default async function PasienDashboard() {
   const poliklinikList = await prisma.poliklinik.findMany({
     orderBy: { namaPoli: 'asc' }
   });
+  // Convert Prisma Decimal values to plain serializable types before passing to client
+  const serializablePoliklinikList = poliklinikList.map(p => ({
+    id: p.id,
+    namaPoli: p.namaPoli,
+    biayaKonsultasi: p.biayaKonsultasi?.toString?.() ?? String(p.biayaKonsultasi ?? '')
+  }))
 
   const antreanHariIni = pasien?.antreans[0];
 
@@ -41,7 +47,7 @@ export default async function PasienDashboard() {
         <ul className="sidebar-menu">
             <li><Link href="/pasien" className="active">Pusat Layanan</Link></li>
             <li><Link href="#">Daftar Tagihan</Link></li>
-            <li><Link href="#">Paparan Survey</Link></li>
+            <li><Link href="/feedback">Paparan Survey</Link></li>
             <li style={{ marginTop: 'auto' }}>
               <form action={logoutUser}>
                 <button type="submit" style={{ background: 'rgba(255,0,0,0.2)', color: '#ffdddd', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
@@ -56,6 +62,9 @@ export default async function PasienDashboard() {
         <div className="topbar">
             <h2>Selamat Datang, {pasien?.namaLengkap || session.username}</h2>
             <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}</div>
+            <div style={{ marginLeft: '16px' }}>
+              <Link href="/feedback" style={{ marginLeft: '12px', padding: '6px 12px', background: 'var(--primary-color)', color: '#fff', borderRadius: '6px', textDecoration: 'none' }}>Isi Evaluasi Kepuasan</Link>
+            </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
@@ -77,7 +86,7 @@ export default async function PasienDashboard() {
                         </div>
                         <p>Anda belum mengambil tiket antrean hari ini.</p>
                         {pasien ? (
-                           <AmbilAntreanButton poliklinikList={poliklinikList} />
+                          <AmbilAntreanButton poliklinikList={serializablePoliklinikList} />
                         ) : (
                            <p style={{ color: 'red' }}>Anda belum melengkapi form pendaftaran pasien.</p>
                         )}
