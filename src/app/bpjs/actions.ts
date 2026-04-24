@@ -1,14 +1,15 @@
-import { prisma } from '../../lib/prisma'
+'use server'
+
+import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { getUserSession } from '../pasien/actions'
-import { submitClaimToBPJS, checkClaimStatusFromBPJS } from '../../lib/bpjsClient'
+import { submitClaimToBPJS, checkClaimStatusFromBPJS } from '@/lib/bpjsClient'
+import { StatusKlaim } from '@prisma/client'
 
 export async function submitKlaim(formData: FormData) {
-  'use server'
   try {
     const tagihanId = Number(formData.get('tagihanId'))
     const klaim = await prisma.klaimBpjs.create({ data: { tagihanId } })
-    // Try submit to BPJS (simulated). Update klaim status based on response.
     try {
       const res = await submitClaimToBPJS(tagihanId)
       if (res?.approved) {
@@ -17,7 +18,6 @@ export async function submitKlaim(formData: FormData) {
         await prisma.klaimBpjs.update({ where: { id: klaim.id }, data: { status: 'DITOLAK' } })
       }
     } catch (e) {
-      // keep klaim as MENUNGGU if external fails
       console.error('BPJS submit error (simulated)', e)
     }
     revalidatePath('/bpjs')
@@ -28,29 +28,20 @@ export async function submitKlaim(formData: FormData) {
 }
 
 export async function setujuiKlaim(klaimId: number) {
-  'use server'
   const session = await getUserSession()
   if (!session || session.role !== 'BPJS') {
-    throw new Error('Akses ditolak.');
+    throw new Error('Akses ditolak.')
   }
-
   try {
-    await prisma.klaimBpjs.update({
-      where: { id: klaimId },
-      data: { status: 'DISETUJUI' }
-    });
-
-    revalidatePath('/bpjs');
+    await prisma.klaimBpjs.update({ where: { id: klaimId }, data: { status: 'DISETUJUI' } })
+    revalidatePath('/bpjs')
   } catch (err) {
-    console.error(err);
-    throw new Error('Gagal menyetujui klaim.');
+    console.error(err)
+    throw new Error('Gagal menyetujui klaim.')
   }
 }
 
-import { StatusKlaim } from '@prisma/client'
-
-export async function syncKlaimStatuses(formData?: FormData) {
-  'use server'
+export async function syncKlaimStatuses() {
   try {
     const pending = await prisma.klaimBpjs.findMany({ where: { status: 'MENUNGGU' } })
     for (const k of pending) {
