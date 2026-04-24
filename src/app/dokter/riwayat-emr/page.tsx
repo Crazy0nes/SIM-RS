@@ -1,11 +1,18 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { getUserSession, logoutUser } from '../../pasien/actions';
+import { getUserSession } from '@/app/pasien/actions';
 import { redirect } from 'next/navigation';
+import RiwayatEMRClient from '@/components/RiwayatEMRClient';
+import DashboardShell from '@/components/DashboardShell';
 
 export const dynamic = 'force-dynamic';
 
-export default async function RiwayatEMR() {
+export default async function RiwayatEMR({
+  searchParams
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
+  const resolvedParams = await searchParams;
   const session = await getUserSession();
 
   if (!session || session.role !== 'DOKTER') {
@@ -18,98 +25,107 @@ export default async function RiwayatEMR() {
   });
 
   if (!dokter) {
-    return <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>Akun Anda belum dipetakan sebagai Dokter di database. Hubungi Manajemen.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center max-w-sm">
+          <h2 className="text-lg font-bold text-gray-800 mb-2">Akun Belum Dipetakan</h2>
+          <p className="text-sm text-gray-500">Akun Anda belum dipetakan sebagai Dokter.</p>
+        </div>
+      </div>
+    );
   }
 
-  // Ambil semua rekam medis dari antrean di poliklinik dokter ini
   const rekamMedisList = await prisma.rekamMedis.findMany({
-    where: {
-      antrean: {
-        poliklinikId: dokter.poliklinikId
-      }
-    },
-    include: {
-      antrean: {
-        include: {
-          pasien: true
-        }
-      }
-    },
-    orderBy: {
-      antrean: {
-        tanggal: 'desc'
-      }
-    }
+    where: { antrean: { poliklinikId: dokter.poliklinikId } },
+    include: { antrean: { include: { pasien: true } } },
+    orderBy: { id: 'desc' },
+    take: 50,
   });
 
+  const serializedRekamMedis = rekamMedisList.map(rm => ({
+    id: rm.id,
+    diagnosa: rm.diagnosa,
+    antreanId: rm.antreanId,
+    antrean: {
+      noAntrean: rm.antrean.noAntrean,
+      tanggal: rm.antrean.tanggal,
+      status: rm.antrean.status,
+      pasien: { namaLengkap: rm.antrean.pasien.namaLengkap, nik: rm.antrean.pasien.nik }
+    }
+  }));
+
   return (
-    <div className="dashboard-layout">
-        <aside className="sidebar">
-            <div className="sidebar-title">RS Tentara P. Siantar<br/><span style={{ fontSize: "14px", fontWeight: "400", color: "#c8e6c9" }}>Portal Dokter</span></div>
-            <ul className="sidebar-menu">
-                <li><Link href="/dokter">Daftar Antrean</Link></li>
-                <li><Link href="/dokter/riwayat-emr" className="active">Riwayat EMR</Link></li>
-                <li style={{ marginTop: "auto" }}>
-                  <form action={logoutUser}>
-                    <button type="submit" style={{ background: "rgba(255,0,0,0.2)", color: "#ffdddd", width: "100%", textAlign: "left", padding: "0.75rem 1rem", border: "none", borderRadius: "var(--radius-md)", cursor: "pointer" }}>
-                        Logout Keluar
-                    </button>
-                  </form>
-                </li>
-            </ul>
-        </aside>
+    <DashboardShell role="DOKTER" poliName={dokter.poliklinik.namaPoli}>
+      {/* Desktop */}
+      <div className="hidden lg:block p-6">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Riwayat Rekam Medis Elektronik</h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {dokter.poliklinik.namaPoli} — {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
+            </p>
+          </div>
+          <span className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">
+            {rekamMedisList.length} EMR
+          </span>
+        </div>
 
-        <main className="main-content">
-            <div className="topbar">
-                <h2>Riwayat Rekam Medis Elektronik - {dokter.poliklinik.namaPoli}</h2>
-                <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}</div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-700">Riwayat EMR Pasien</h3>
+          </div>
+
+          {rekamMedisList.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    {['Tanggal', 'No Antrean', 'Nama Pasien', 'NIK', 'Diagnosa', 'Aksi'].map(h => (
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {rekamMedisList.map((rm) => (
+                    <tr key={rm.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-4 py-3.5 text-sm text-gray-500">
+                        {rm.antrean.tanggal.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className="font-bold text-green-700">{String(rm.antrean.noAntrean).padStart(3, '0')}</span>
+                      </td>
+                      <td className="px-4 py-3.5 text-sm font-medium text-gray-800">{rm.antrean.pasien.namaLengkap}</td>
+                      <td className="px-4 py-3.5 text-sm text-gray-500">{rm.antrean.pasien.nik}</td>
+                      <td className="px-4 py-3.5 text-sm text-gray-600 max-w-xs truncate">{rm.diagnosa}</td>
+                      <td className="px-4 py-3.5">
+                        <Link href={`/dokter/rme/${rm.antreanId}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-medium rounded-lg transition-colors">
+                          Lihat Detail
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                            <path d="M9 5l7 7-7 7"/>
+                          </svg>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          ) : (
+            <div className="py-12 text-center text-gray-400 text-sm">Belum ada riwayat EMR untuk poliklinik ini.</div>
+          )}
+        </div>
+      </div>
 
-            <div className="card">
-                <h3>Riwayat EMR Pasien</h3>
-
-                {rekamMedisList.length > 0 ? (
-                <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "1rem" }}>
-                    <thead>
-                        <tr>
-                            <th style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left", background: "var(--primary-bg)", color: "var(--primary-color)" }}>Tanggal</th>
-                            <th style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left", background: "var(--primary-bg)", color: "var(--primary-color)" }}>No Antrean</th>
-                            <th style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left", background: "var(--primary-bg)", color: "var(--primary-color)" }}>Nama Pasien</th>
-                            <th style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left", background: "var(--primary-bg)", color: "var(--primary-color)" }}>Diagnosa</th>
-                            <th style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left", background: "var(--primary-bg)", color: "var(--primary-color)" }}>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rekamMedisList.map((rm) => (
-                        <tr key={rm.id}>
-                            <td style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left" }}>
-                                {rm.antrean.tanggal.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                            </td>
-                            <td style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left" }}>
-                                <strong>{String(rm.antrean.noAntrean).padStart(3, '0')}</strong>
-                            </td>
-                            <td style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left" }}>
-                                {rm.antrean.pasien.namaLengkap}
-                            </td>
-                            <td style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left" }}>
-                                {rm.diagnosa}
-                            </td>
-                            <td style={{ padding: "12px", borderBottom: "1px solid var(--border-color)", textAlign: "left" }}>
-                                <Link href={`/dokter/rme/${rm.antreanId}`} className="btn btn-outline" style={{ padding:"6px 12px", fontSize:"14px", textDecoration:"none", display:"inline-block" }}>
-                                    Lihat Detail
-                                </Link>
-                            </td>
-                        </tr>
-                        ))}
-                    </tbody>
-                </table>
-                ) : (
-                <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                    Belum ada riwayat EMR untuk poliklinik ini.
-                </p>
-                )}
-            </div>
-        </main>
-    </div>
+      {/* Mobile */}
+      <div className="lg:hidden">
+        <RiwayatEMRClient
+          initialTab={resolvedParams.tab || 'resume'}
+          rekamMedisList={serializedRekamMedis}
+          currentPath="/dokter/riwayat-emr"
+          poliName={dokter.poliklinik.namaPoli}
+        />
+      </div>
+    </DashboardShell>
   );
 }

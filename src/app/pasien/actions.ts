@@ -78,3 +78,37 @@ export async function ambilAntrean(poliklinikId: number) {
     return { error: 'Gagal mengambil antrean: ' + (error as Error).message }
   }
 }
+
+export async function updateProfile(pasienId: number | null, formData: FormData) {
+  const session = await getUserSession()
+  if (!session || session.role !== 'PASIEN') {
+    return { error: 'Anda tidak memiliki akses.' }
+  }
+
+  try {
+    const pasien = await prisma.pasien.findUnique({ where: { userId: session.id } })
+    if (!pasien) return { error: 'Data pasien tidak ditemukan.' }
+
+    const namaLengkap = formData.get('namaLengkap') as string
+    const nik = formData.get('nik') as string
+    const noBpjs = formData.get('noBpjs') as string
+    const alamat = formData.get('alamat') as string
+
+    if (!namaLengkap || !nik) return { error: 'Nama dan NIK wajib diisi.' }
+
+    await prisma.pasien.update({
+      where: { id: pasien.id },
+      data: {
+        namaLengkap,
+        nik,
+        noBpjs: noBpjs || null,
+        alamat: alamat || null,
+      }
+    })
+
+    revalidatePath('/profile')
+    return { success: true }
+  } catch (error: unknown) {
+    return { error: 'Gagal memperbarui profil: ' + (error as Error).message }
+  }
+}

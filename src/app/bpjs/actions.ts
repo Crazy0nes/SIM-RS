@@ -47,6 +47,8 @@ export async function setujuiKlaim(klaimId: number) {
   }
 }
 
+import { StatusKlaim } from '@prisma/client'
+
 export async function syncKlaimStatuses(formData?: FormData) {
   'use server'
   try {
@@ -55,7 +57,7 @@ export async function syncKlaimStatuses(formData?: FormData) {
       try {
         const res = await checkClaimStatusFromBPJS(k.id)
         if (res?.status) {
-          await prisma.klaimBpjs.update({ where: { id: k.id }, data: { status: res.status } })
+          await prisma.klaimBpjs.update({ where: { id: k.id }, data: { status: res.status as StatusKlaim } })
         }
       } catch (e) {
         console.error('error checking claim', k.id, e)

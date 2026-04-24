@@ -1,14 +1,16 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { getUserSession, logoutUser } from './actions';
+import { getUserSession } from './actions';
 import { redirect } from 'next/navigation';
 import AmbilAntreanButton from './AmbilAntreanButton';
+import PasienDashboardClient from '@/components/PasienDashboardClient';
+import DashboardShell from '@/components/DashboardShell';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PasienDashboard() {
   const session = await getUserSession();
-  
+
   if (!session || session.role !== 'PASIEN') {
     redirect('/login');
   }
@@ -16,14 +18,14 @@ export default async function PasienDashboard() {
   const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
   const todayUTC = new Date(dateStr + 'T00:00:00.000Z');
 
-  // Tarik data detail pasien beserta antrean hari ini
   const pasien = await prisma.pasien.findUnique({
     where: { userId: session.id },
     include: {
       antreans: {
         where: { tanggal: { gte: todayUTC } },
         orderBy: [ { tanggal: 'asc' }, { id: 'asc' } ],
-        take: 1
+        take: 1,
+        include: { poliklinik: true }
       }
     }
   });
@@ -31,84 +33,133 @@ export default async function PasienDashboard() {
   const poliklinikList = await prisma.poliklinik.findMany({
     orderBy: { namaPoli: 'asc' }
   });
-  // Convert Prisma Decimal values to plain serializable types before passing to client
   const serializablePoliklinikList = poliklinikList.map(p => ({
     id: p.id,
     namaPoli: p.namaPoli,
     biayaKonsultasi: p.biayaKonsultasi?.toString?.() ?? String(p.biayaKonsultasi ?? '')
-  }))
+  }));
 
   const antreanHariIni = pasien?.antreans[0];
 
+  const serializedPasien = pasien ? {
+    namaLengkap: pasien.namaLengkap,
+    id: pasien.id,
+    nik: pasien.nik,
+    noBpjs: pasien.noBpjs,
+    alamat: pasien.alamat,
+  } : null;
+
+  const serializedAntrean = antreanHariIni ? {
+    noAntrean: antreanHariIni.noAntrean,
+    status: antreanHariIni.status,
+    tanggal: antreanHariIni.tanggal,
+    poliklinik: antreanHariIni.poliklinik ? { namaPoli: antreanHariIni.poliklinik.namaPoli } : undefined,
+  } : null;
+
+  const today = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
+
   return (
-    <div className="dashboard-layout">
-      <aside className="sidebar">
-        <div className="sidebar-title">RS Tentara P. Siantar</div>
-        <ul className="sidebar-menu">
-            <li><Link href="/pasien" className="active">Pusat Layanan</Link></li>
-            <li><Link href="#">Daftar Tagihan</Link></li>
-            <li><Link href="/feedback">Paparan Survey</Link></li>
-            <li style={{ marginTop: 'auto' }}>
-              <form action={logoutUser}>
-                <button type="submit" style={{ background: 'rgba(255,0,0,0.2)', color: '#ffdddd', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
-                  Logout Keluar
-                </button>
-              </form>
-            </li>
-        </ul>
-      </aside>
-
-      <main className="main-content">
-        <div className="topbar">
-            <h2>Selamat Datang, {pasien?.namaLengkap || session.username}</h2>
-            <div style={{ fontWeight: "500" }}>{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}</div>
-            <div style={{ marginLeft: '16px' }}>
-              <Link href="/feedback" style={{ marginLeft: '12px', padding: '6px 12px', background: 'var(--primary-color)', color: '#fff', borderRadius: '6px', textDecoration: 'none' }}>Isi Evaluasi Kepuasan</Link>
-            </div>
+    <DashboardShell role="PASIEN">
+      {/* Desktop view */}
+      <div className="hidden lg:block p-6">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Selamat Datang, {pasien?.namaLengkap || session.username}
+            </h1>
+            <p className="text-sm text-gray-500 mt-0.5">{today}</p>
+          </div>
+          <Link
+            href="/feedback"
+            className="px-4 py-2 bg-green-700 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            Isi Evaluasi Kepuasan
+          </Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-            <div className="card" style={{ textAlign: "center", padding: "40px 20px" }}>
-                <h3>Nomor Antrean Anda Hari Ini</h3>
-                {antreanHariIni ? (
-                    <>
-                        <div style={{ fontSize: "5rem", fontWeight: "700", color: "var(--primary-color)", margin: "20px 0", border: "4px dashed var(--border-color)", display: "inline-block", padding: "10px 40px", borderRadius: "20px" }}>
-                            {String(antreanHariIni.noAntrean).padStart(3, '0')}
-                        </div>
-                        <p>Status: <strong style={{ color: "var(--primary-color)", textTransform: "uppercase" }}>{antreanHariIni.status}</strong></p>
-                        <p>Jadwal: <strong>{new Date(antreanHariIni.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta'})}</strong></p>
-                        <p style={{ color: "var(--text-muted)", marginTop: "10px" }}>Silakan menunggu di bagian {antreanHariIni.poliklinikId ? 'Poli' : 'Poliklinik'}.</p>
-                    </>
-                ) : (
-                    <>
-                        <div style={{ fontSize: "5rem", fontWeight: "700", color: "var(--primary-color)", margin: "20px 0", border: "4px dashed var(--border-color)", display: "inline-block", padding: "10px 40px", borderRadius: "20px" }}>
-                            --
-                        </div>
-                        <p>Anda belum mengambil tiket antrean hari ini.</p>
-                        {pasien ? (
-                          <AmbilAntreanButton poliklinikList={serializablePoliklinikList} />
-                        ) : (
-                           <p style={{ color: 'red' }}>Anda belum melengkapi form pendaftaran pasien.</p>
-                        )}
-                        
-                    </>
-                )}
-            </div>
-
-            <div className="card">
-                <h3>Informasi Pasien</h3>
-                <hr style={{ border: 0, borderTop: "1px solid var(--border-color)", margin: "15px 0" }} />
-                <p><strong>Nama Lengkap:</strong> {pasien?.namaLengkap || 'Belum diisi'}</p>
-                <p><strong>ID Pasien:</strong> PSN-{String(pasien?.id || 0).padStart(4, '0')}</p>
-                <p><strong>NIK:</strong> {pasien?.nik || '-'}</p>
-                
-                <h3 style={{ marginTop: "30px" }}>Notifikasi</h3>
-                <div className="alert alert-success mt-4">
-                    Belum ada notifikasi baru untuk Anda hari ini.
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Queue Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+            <h3 className="text-base font-semibold text-gray-600 mb-6">Nomor Antrean Anda Hari Ini</h3>
+            {antreanHariIni ? (
+              <>
+                <div className="inline-block text-7xl font-extrabold text-green-700 border-4 border-dashed border-green-300 px-10 py-4 rounded-2xl mb-4">
+                  {String(antreanHariIni.noAntrean).padStart(3, '0')}
                 </div>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"/>
+                  <span className="text-sm font-semibold text-green-700 uppercase">{antreanHariIni.status}</span>
+                </div>
+                <p className="text-sm text-gray-500 mb-1">
+                  {new Date(antreanHariIni.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta'})}
+                </p>
+                {antreanHariIni.poliklinik && (
+                  <p className="text-sm text-gray-400 mt-1">
+                    Poli: {antreanHariIni.poliklinik.namaPoli}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="inline-block text-7xl font-extrabold text-gray-300 border-4 border-dashed border-gray-200 px-10 py-4 rounded-2xl mb-4">
+                  --
+                </div>
+                <p className="text-gray-500 mb-5">Anda belum mengambil tiket antrean hari ini.</p>
+                {pasien ? (
+                  <AmbilAntreanButton poliklinikList={serializablePoliklinikList} />
+                ) : (
+                  <p className="text-red-500 text-sm">Anda belum melengkapi form pendaftaran pasien.</p>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Info Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-base font-semibold text-gray-700 mb-4">Informasi Pasien</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <span className="text-sm text-gray-500">Nama Lengkap</span>
+                <span className="text-sm font-semibold text-gray-800">{pasien?.namaLengkap || '-'}</span>
+              </div>
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <span className="text-sm text-gray-500">ID Pasien</span>
+                <span className="text-sm font-semibold text-gray-800">PSN-{String(pasien?.id || 0).padStart(4, '0')}</span>
+              </div>
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <span className="text-sm text-gray-500">NIK</span>
+                <span className="text-sm font-semibold text-gray-800">{pasien?.nik || '-'}</span>
+              </div>
+              {pasien?.noBpjs && (
+                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                  <span className="text-sm text-gray-500">No. BPJS</span>
+                  <span className="text-sm font-semibold text-gray-800">{pasien.noBpjs}</span>
+                </div>
+              )}
+              {pasien?.alamat && (
+                <div className="flex items-center justify-between py-2.5">
+                  <span className="text-sm text-gray-500">Alamat</span>
+                  <span className="text-sm font-semibold text-gray-800 text-right max-w-xs">{pasien.alamat}</span>
+                </div>
+              )}
             </div>
+
+            <h3 className="text-base font-semibold text-gray-700 mt-6 mb-4">Notifikasi</h3>
+            <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700">
+              Belum ada notifikasi baru untuk Anda hari ini.
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* Mobile view */}
+      <div className="lg:hidden">
+        <PasienDashboardClient
+          pasien={serializedPasien}
+          antreanHariIni={serializedAntrean}
+          poliList={serializablePoliklinikList}
+        />
+      </div>
+    </DashboardShell>
   );
 }
