@@ -72,7 +72,7 @@ export default function PasienDashboardClient({
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Mobile Header */}
-      <div className="bg-green-700 text-white px-4 pt-4 pb-3 flex-shrink-0">
+      <div className="bg-green-700 text-white px-4 pt-4 pb-3 shrink-0">
         <p className="text-xs text-green-300">{today}</p>
         <h1 className="text-lg font-bold mt-0.5">
           Selamat Datang, {pasien?.namaLengkap || 'Pasien'}
@@ -176,7 +176,7 @@ export default function PasienDashboardClient({
               href="/feedback"
               className="flex items-center gap-3 px-4 py-3 bg-green-50 hover:bg-green-100 rounded-xl text-green-800 font-medium text-sm transition-colors"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-green-700 flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-green-700 shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
               </svg>
               Paparan Survey Kepuasan
@@ -185,7 +185,7 @@ export default function PasienDashboardClient({
               href="/billing"
               className="flex items-center gap-3 px-4 py-3 bg-green-50 hover:bg-green-100 rounded-xl text-green-800 font-medium text-sm transition-colors"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-green-700 flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-green-700 shrink-0">
                 <rect x="2" y="5" width="20" height="14" rx="2"/>
                 <line x1="2" y1="10" x2="22" y2="10"/>
               </svg>
@@ -195,7 +195,7 @@ export default function PasienDashboardClient({
               href="/emr"
               className="flex items-center gap-3 px-4 py-3 bg-green-50 hover:bg-green-100 rounded-xl text-green-800 font-medium text-sm transition-colors"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-green-700 flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-green-700 shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
               </svg>
               Rekam Medis Elektronik

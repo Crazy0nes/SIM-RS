@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { getUserSession } from '../pasien/actions'
+import { getUserSession } from '@/app/pasien/actions'
 import { submitClaimToBPJS, checkClaimStatusFromBPJS } from '@/lib/bpjsClient'
 import { StatusKlaim } from '@prisma/client'
 
@@ -24,6 +24,20 @@ export async function submitKlaim(formData: FormData) {
   } catch (err) {
     console.error('submitKlaim error', err)
     throw err
+  }
+}
+
+export async function tolakKlaim(klaimId: number) {
+  const session = await getUserSession()
+  if (!session || session.role !== 'BPJS') {
+    throw new Error('Akses ditolak.')
+  }
+  try {
+    await prisma.klaimBpjs.update({ where: { id: klaimId }, data: { status: 'DITOLAK' } })
+    revalidatePath('/bpjs')
+  } catch (err) {
+    console.error(err)
+    throw new Error('Gagal menolak klaim.')
   }
 }
 

@@ -66,7 +66,7 @@ export default function DashboardShell({ role, poliName, children }: DashboardSh
       {/* =========================================
           DESKTOP SIDEBAR — lg+
           ========================================= */}
-      <aside className="w-64 flex-shrink-0 bg-green-700 text-white flex-col hidden lg:flex h-full">
+      <aside className="w-64 shrink-0 bg-green-700 text-white flex-col hidden lg:flex h-full">
         <div className="px-6 pt-6 pb-4 border-b border-green-600">
           <div className="text-base font-bold leading-tight">RS Tentara P. Siantar</div>
           {poliName && <div className="text-xs text-green-300 mt-0.5">{poliName}</div>}
@@ -179,7 +179,7 @@ export default function DashboardShell({ role, poliName, children }: DashboardSh
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Mobile Top Bar */}
-        <header className="lg:hidden flex-shrink-0 bg-green-700 text-white px-4 py-3 flex items-center justify-between shadow-md z-30 sticky top-0">
+        <header className="lg:hidden shrink-0 bg-green-700 text-white px-4 py-3 flex items-center justify-between shadow-md z-30 sticky top-0">
           <div className="text-sm font-bold leading-tight">RS Tentara P. Siantar</div>
           <button
             onClick={() => setSidebarOpen(true)}
