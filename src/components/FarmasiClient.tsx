@@ -56,61 +56,7 @@ export default function FarmasiClient({ initialReseps, today }: FarmasiClientPro
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-
-      {/* =========================================
-          DESKTOP SIDEBAR
-          ========================================= */}
-      <aside className="w-64 shrink-0 bg-green-700 text-white flex-col hidden lg:flex h-full">
-        <div className="px-6 pt-6 pb-4 border-b border-green-600">
-          <div className="text-base font-bold leading-tight">RS Tentara P. Siantar</div>
-          <div className="text-xs text-green-300 mt-0.5">Portal Farmasi</div>
-        </div>
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          <Link href="/farmasi" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-white/20 text-white">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-            </svg>
-            Antrean Resep
-          </Link>
-        </nav>
-        <div className="px-3 py-4 border-t border-green-600">
-          <form action={async () => {
-            const { cookies } = await import('next/headers');
-            const { logoutUser } = await import('@/app/pasien/actions');
-            await logoutUser();
-          }}>
-            <button type="submit" className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-red-200 hover:bg-red-500/20 hover:text-red-100 transition-all">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              Logout Keluar
-            </button>
-          </form>
-        </div>
-      </aside>
-
-      {/* =========================================
-          MOBILE SIDEBAR OVERLAY
-          ========================================= */}
-      {false && (
-        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden" />
-      )}
-
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-        {/* Mobile Top Bar */}
-        <header className="lg:hidden shrink-0 bg-green-700 text-white px-4 py-3 flex items-center justify-between shadow-md z-30 sticky top-0">
-          <div className="text-sm font-bold leading-tight">RS Tentara P. Siantar</div>
-          <div className="text-xs text-green-300">Portal Farmasi</div>
-        </header>
-
-        {/* =========================================
-            MAIN CONTENT
-            ========================================= */}
-        <main className="flex-1 overflow-y-auto">
+    <div className="h-full bg-gray-50">
 
           {/* Mobile: Antrean Resep */}
           <div className="lg:hidden p-4 pb-24">
@@ -245,8 +191,7 @@ export default function FarmasiClient({ initialReseps, today }: FarmasiClientPro
               )}
             </div>
           </div>
-        </main>
-      </div>
+
 
       {/* =========================================
           MOBILE DETAIL SHEET
