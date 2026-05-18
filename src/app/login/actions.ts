@@ -40,7 +40,8 @@ export async function loginUser(prevState: any, formData: FormData) {
       APOTEKER: 'farmasi',
       LAB: 'lab',
       BPJS: 'bpjs',
-      KASIR: 'kasir'
+      KASIR: 'kasir',
+      MANAJEMEN: 'laporan'
     }
 
     rolePath = roleMap[user.role]

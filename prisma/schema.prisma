@@ -12,16 +12,16 @@ model User {
   password  String
   role      Role
   createdAt DateTime @default(now())
-  pasien    Pasien?
   dokter    Dokter?
+  pasien    Pasien?
 }
 
 model Poliklinik {
   id              Int       @id @default(autoincrement())
   namaPoli        String    @unique
   biayaKonsultasi Decimal   @default(150000) @db.Decimal(15, 2)
-  dokters         Dokter[]
   antreans        Antrean[]
+  dokters         Dokter[]
 }
 
 model Dokter {
@@ -30,8 +30,8 @@ model Dokter {
   namaLengkap  String
   spesialisasi String
   poliklinikId Int
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   poliklinik   Poliklinik @relation(fields: [poliklinikId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Pasien {
@@ -44,7 +44,6 @@ model Pasien {
   dokumenBpjs String?
   alamat      String?
   antreans    Antrean[]
-  feedbacks   Feedback[]
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -64,14 +63,14 @@ model Antrean {
 model RekamMedis {
   id              Int     @id @default(autoincrement())
   antreanId       Int     @unique
+  diagnosa        String
+  beratBadan      Float
+  catatanTambahan String
   keluhanUtama    String
   riwayatPenyakit String
-  tekananDarah    String
   suhuTubuh       Float
-  beratBadan      Float
+  tekananDarah    String
   tinggiBadan     Float
-  diagnosa        String
-  catatanTambahan String
   lab             Lab[]
   antrean         Antrean @relation(fields: [antreanId], references: [id], onDelete: Cascade)
   resep           Resep[]
@@ -99,19 +98,19 @@ model Tagihan {
   antreanId  Int           @unique
   totalBiaya Decimal       @db.Decimal(15, 2)
   status     StatusTagihan @default(BELUM_DIBAYAR)
-  klaimBpjs  KlaimBpjs[]
   items      ItemTagihan[]
+  klaimBpjs  KlaimBpjs[]
   antrean    Antrean       @relation(fields: [antreanId], references: [id], onDelete: Cascade)
 }
 
 model ItemTagihan {
-  id         Int      @id @default(autoincrement())
-  tagihanId  Int
-  namaItem   String
-  jumlah     Int      @default(1)
-  harga      Decimal  @db.Decimal(15, 2)
-  subTotal   Decimal  @db.Decimal(15, 2)
-  tagihan    Tagihan  @relation(fields: [tagihanId], references: [id], onDelete: Cascade)
+  id        Int     @id @default(autoincrement())
+  tagihanId Int
+  namaItem  String
+  jumlah    Int     @default(1)
+  harga     Decimal @db.Decimal(15, 2)
+  subTotal  Decimal @db.Decimal(15, 2)
+  tagihan   Tagihan @relation(fields: [tagihanId], references: [id], onDelete: Cascade)
 }
 
 model KlaimBpjs {
@@ -119,15 +118,6 @@ model KlaimBpjs {
   tagihanId Int
   status    StatusKlaim @default(MENUNGGU)
   tagihan   Tagihan     @relation(fields: [tagihanId], references: [id], onDelete: Cascade)
-}
-
-model Feedback {
-  id        Int      @id @default(autoincrement())
-  pasienId  Int?
-  rating    Int      @default(5)
-  message   String
-  createdAt DateTime @default(now())
-  pasien    Pasien?  @relation(fields: [pasienId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
   // Build CSV
   const header = ['AntreanID','Tanggal','Pasien','Poliklinik','NoAntrean','Status','TotalTagihan']
-  const rows = antreans.map(a => [
+  const rows = antreans.map((a: any) => [
     String(a.id),
     a.tanggal.toISOString(),
     a.pasien?.namaLengkap ?? '',
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     a.tagihan ? a.tagihan.totalBiaya.toString() : ''
   ])
 
-  const csv = [header.join(','), ...rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','))].join('\n')
+  const csv = [header.join(','), ...rows.map((r: any[]) => r.map((v: any) => '"' + String(v).replace(/"/g,'""') + '"').join(','))].join('\n')
 
   return new NextResponse(csv, {
     status: 200,

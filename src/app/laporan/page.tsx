@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function LaporanPage() {
   const session = await getUserSession();
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'DOKTER')) {
+  if (!session || (session.role !== 'MANAJEMEN' && session.role !== 'DOKTER')) {
     redirect('/login');
   }
 
@@ -69,7 +69,7 @@ export default async function LaporanPage() {
   };
 
   return (
-    <DashboardShell role="ADMIN">
+    <DashboardShell role="MANAJEMEN">
       <ManajemenClient
         initialData={initialData}
         defaultStart={startISO}

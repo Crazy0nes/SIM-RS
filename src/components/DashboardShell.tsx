@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { logoutUser } from '@/app/pasien/actions';
 
 interface DashboardShellProps {
-  role: 'DOKTER' | 'PASIEN' | 'PERAWAT' | 'APOTEKER' | 'KASIR' | 'ADMIN' | 'LAB';
+  role: 'DOKTER' | 'PASIEN' | 'PERAWAT' | 'APOTEKER' | 'KASIR' | 'MANAJEMEN' | 'LAB';
   poliName?: string;
   children: React.ReactNode;
 }
@@ -43,7 +43,7 @@ export default function DashboardShell({ role, poliName, children }: DashboardSh
 
   const navItems = role === 'PASIEN' ? pasienItems
     : role === 'DOKTER' ? dokterItems
-    : role === 'KASIR' || role === 'ADMIN' ? kasirItems
+    : role === 'KASIR' || role === 'MANAJEMEN' ? kasirItems
     : role === 'APOTEKER' ? apotekerItems
     : role === 'LAB' || role === 'PERAWAT' ? labItems
     : [];
@@ -57,7 +57,7 @@ export default function DashboardShell({ role, poliName, children }: DashboardSh
     : role === 'APOTEKER' ? 'Farmasi'
     : role === 'LAB' ? 'Laboratorium'
     : role === 'PERAWAT' ? 'Perawat'
-    : role === 'ADMIN' ? 'Manajemen'
+    : role === 'MANAJEMEN' ? 'Manajemen'
     : role;
 
   return (
